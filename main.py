@@ -45,7 +45,7 @@ else:
 try:
     for epoch in range(world.TRAIN_epochs):
         start = time.time()
-        if epoch % 50 == 0:
+        if epoch % 10 == 2:
             cprint("[TEST]")
             Procedure.Test(dataset, Recmodel, epoch, w, world.config['multicore'])
             torch.save(Recmodel.state_dict(), weight_file)

@@ -13,7 +13,7 @@ from dataloader import BasicDataset
 from torch import nn
 import numpy as np
 from sentence_transformers import SentenceTransformer
-
+from tqdm import tqdm
 
 class BasicModel(nn.Module):    
     def __init__(self):
@@ -40,7 +40,7 @@ class MLP(nn.Module):
     def __init__(self, input_dim=768, output_dim=64):
         super(MLP, self).__init__()
         self.fc1 = nn.Linear(input_dim, 256)
-        self.relu = nn.ReLU(inplace=False)
+        self.relu = nn.ReLU()
         self.leakyrelu = nn.LeakyReLU(0.1, inplace=True)
         self.Sigmoid = nn.Sigmoid()
         self.fc2 = nn.Linear(256, 128)
@@ -49,7 +49,12 @@ class MLP(nn.Module):
         self.fc = nn.Linear(input_dim, output_dim)
 
     def forward(self, x):
-        x = self.fc(x)
+        torch.autograd.set_detect_anomaly(True)
+        x = self.fc1(x)
+        x = self.relu(x)
+        x = self.fc2(x)
+        x = self.relu(x)
+        x = self.fc3(x)
         return x
 
 class LightGCN(BasicModel):
@@ -72,8 +77,6 @@ class LightGCN(BasicModel):
         self.A_split = self.config['A_split']
         self.embedding_user = torch.nn.Embedding(
             num_embeddings=self.num_users, embedding_dim=self.latent_dim).to(world.device)
-        self.item_word_embeddings = torch.tensor(self.bert.encode(self.dataset.item_meta)).to(world.device)
-        self.embedding_item = self.mlp(self.item_word_embeddings).to(world.device)
         # self.embedding_item = torch.tensor(self.bert.encode(self.dataset.item_meta)).to(world.device)
         # self.embedding_item = torch.nn.Embedding(
         #     num_embeddings=self.num_items, embedding_dim=self.latent_dim)
@@ -83,11 +86,13 @@ class LightGCN(BasicModel):
 #             print('use xavier initilizer')
 # random normal init seems to be a better choice when lightGCN actually don't use any non-linear activation function
             nn.init.normal_(self.embedding_user.weight, std=0.1)
-            nn.init.normal_(self.embedding_item, std=0.1)
+            # self.embedding_item = torch.nn.functional.normalize(self.embedding_item, p = 2, dim = -1)
+            # nn.init.normal_(self.embedding_item, std=0.1)
             world.cprint('use NORMAL distribution initilizer')
         else:
-            self.embedding_user.weight.data.copy_(torch.from_numpy(self.config['user_emb']))
-            self.embedding_item.weight.data.copy_(torch.from_numpy(self.config['item_emb']))
+            print("sdsjdflkajdfkl;a;fkldjf;")
+            # self.embedding_user.weight.data.copy_(torch.from_numpy(self.config['user_emb']))
+            # self.embedding_item.weight.data.copy_(torch.from_numpy(self.config['item_emb']))
             print('use pretarined data')
         self.f = nn.Sigmoid()
         self.Graph = self.dataset.getSparseGraph()
@@ -117,7 +122,13 @@ class LightGCN(BasicModel):
     def computer(self):
         """
         propagate methods for lightGCN
-        """       
+        """
+        word_embeddings = []
+        for i in tqdm(self.dataset.item_meta):
+            embeddings = self.bert.encode(i)
+            word_embeddings.append(embeddings)
+        self.item_word_embeddings = torch.tensor(word_embeddings).to(world.device)
+        self.embedding_item = self.mlp(self.item_word_embeddings).to(world.device)
         users_emb = self.embedding_user.weight
         items_emb = self.embedding_item
         all_emb = torch.cat([users_emb, items_emb])
