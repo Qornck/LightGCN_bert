@@ -90,9 +90,8 @@ class LightGCN(BasicModel):
             # nn.init.normal_(self.embedding_item, std=0.1)
             world.cprint('use NORMAL distribution initilizer')
         else:
-            print("sdsjdflkajdfkl;a;fkldjf;")
-            # self.embedding_user.weight.data.copy_(torch.from_numpy(self.config['user_emb']))
-            # self.embedding_item.weight.data.copy_(torch.from_numpy(self.config['item_emb']))
+            self.embedding_user.weight.data.copy_(torch.from_numpy(self.config['user_emb']))
+            self.embedding_item.weight.data.copy_(torch.from_numpy(self.config['item_emb']))
             print('use pretarined data')
         self.f = nn.Sigmoid()
         self.Graph = self.dataset.getSparseGraph()
@@ -132,7 +131,6 @@ class LightGCN(BasicModel):
         users_emb = self.embedding_user.weight
         items_emb = self.embedding_item
         all_emb = torch.cat([users_emb, items_emb])
-        #   torch.split(all_emb , [self.num_users, self.num_items])
         embs = [all_emb]
         if self.config['dropout']:
             if self.training:
