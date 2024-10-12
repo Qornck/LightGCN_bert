@@ -244,8 +244,8 @@ class Loader(BasicDataset):
             for l in f.readlines():
                 if len(l) > 0:
                     l = l.strip('\n').split(' ')
-                    items = [int(i) - 1 for i in l[1:]]
-                    uid = int(l[0]) - 1
+                    items = [int(i) for i in l[1:]]
+                    uid = int(l[0])
                     trainUniqueUsers.append(uid)
                     trainUser.extend([uid] * len(items))
                     trainItem.extend(items)
@@ -260,8 +260,8 @@ class Loader(BasicDataset):
             for l in f.readlines():
                 if len(l) > 0:
                     l = l.strip('\n').split(' ')
-                    items = [int(i) - 1 for i in l[1:]]
-                    uid = int(l[0]) - 1
+                    items = [int(i) for i in l[1:]]
+                    uid = int(l[0])
                     testUniqueUsers.append(uid)
                     testUser.extend([uid] * len(items))
                     testItem.extend(items)
@@ -278,7 +278,7 @@ class Loader(BasicDataset):
         with open(item_dict_file) as f:
             for l in f.readlines():
                 if len(l) > 0:
-                    l = l.strip('\n').split(' ')
+                    l = l.strip('\n').split(' ', 1)
                     self.item_meta.append(l[1])
                     item_with_meta += 1
         print(item_with_meta)

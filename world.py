@@ -17,7 +17,7 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 args = parse_args()
 
 ROOT_PATH = os.path.dirname(os.path.dirname(__file__))
-CODE_PATH = join(ROOT_PATH, 'LightGCN-bert')
+CODE_PATH = join(ROOT_PATH, 'LightGCN_bert')
 DATA_PATH = join(ROOT_PATH, 'data')
 BOARD_PATH = join(CODE_PATH, 'runs')
 FILE_PATH = join(CODE_PATH, 'checkpoints')
@@ -30,7 +30,7 @@ if not os.path.exists(FILE_PATH):
 
 
 config = {}
-all_dataset = ['lastfm', 'gowalla', 'yelp2018', 'amazon-book', 'Movie_and_TV']
+all_dataset = ['lastfm', 'gowalla', 'yelp2018', 'amazon-book', 'Movie_and_TV', 'Luxury_Beauty']
 all_models  = ['mf', 'lgn']
 # config['batch_size'] = 4096
 config['bpr_batch_size'] = args.bpr_batch

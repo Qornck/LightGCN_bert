@@ -64,7 +64,7 @@ class LightGCN(BasicModel):
         super(LightGCN, self).__init__()
         self.config = config
         self.dataset : dataloader.BasicDataset = dataset
-        self.bert = SentenceTransformer('../nq-distilbert-base-v1').to(world.device)
+        self.bert = SentenceTransformer('../../nq-distilbert-base-v1').to(world.device)
         self.mlp = MLP(768, self.config['latent_dim_rec']).to(world.device)
         self.__init_weight()
 
@@ -122,12 +122,15 @@ class LightGCN(BasicModel):
         """
         propagate methods for lightGCN
         """
-        word_embeddings = []
-        for i in tqdm(self.dataset.item_meta):
-            embeddings = self.bert.encode(i)
-            word_embeddings.append(embeddings)
+        # word_embeddings = []
+        # batch_size = 1048
+        # for i in tqdm(range(0, len(self.dataset.item_meta), batch_size)):
+        #     embeddings = self.bert.encode(self.dataset.item_meta[i:i+batch_size])
+        #     word_embeddings.extend(embeddings)
+        word_embeddings = self.bert.encode(self.dataset.item_meta)
         self.item_word_embeddings = torch.tensor(word_embeddings).to(world.device)
         self.embedding_item = self.mlp(self.item_word_embeddings).to(world.device)
+        # self.embedding_item = torch.nn.functional.normalize(self.embedding_item, p = 2, dim = -1)
         users_emb = self.embedding_user.weight
         items_emb = self.embedding_item
         all_emb = torch.cat([users_emb, items_emb])
